@@ -1,0 +1,42 @@
+<resources>
+    <string name="app_name">Shop app</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">InPizza</string>
+    <string name="nav_header_subtitle">A huge variety of dishes</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+    <string name="menu_home">Home</string>
+    <string name="home_fragment_title">Our menu</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="login">Login</string>
+    <string name="required">
+        The field is required
+    </string>
+    <string name="about_us_description">
+        Our Filipino cuisine inspired restaurant is created from the idea that hard-working people occasionally crave a fulfilling rice meal, hence, Rice Craving.  We hope you will love this and our food.
+    </string>
+    <string name="signup">Sign up</string>
+    <string name="menu">Menu</string>
+    <string name="about_us">About us</string>
+    <string name="contact_us">Contact us</string>
+    <string name="content_description_media">In this example, a new instance of ExampleFragment replaces the fragment,</string>
+    <string name="secondary_text">Secondary title</string>
+    <string name="supporting_text">Supporting text</string>
+    <string name="view">View</string>
+    <string name="title">Title</string>
+    <string name="dummy_text">"That doesn't remind us that our storage is public, as it does in firebase database. Are you sure this is the only way of making it public? "</string>
+    <string name="order">Order</string>
+    <string name="ingredients">Ingredients</string>
+    <string name="ingredient">Ingredient</string>
+    <string name="login_with_google">Login with google</string>
+    <string name="submit">Submit</string>
+    <string name="add_a_new_recipy">Add a new recipy</string>
+    <string name="ingredients">Ingredients</string>
+    <string name="description">Description</string>
+    <string name="submit">Submit</string>
+    <string name="weight">Weight</string>
+    <string name="price">Price</string>
+    <string name="upload_a_file">Upload a file</string>
+</resources>

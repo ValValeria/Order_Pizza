@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+     <TextView
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:text="@string/ingredient"
+         android:paddingBottom="@dimen/space_half"
+         android:id="@+id/textIngredient"
+         android:textAppearance="?attr/textAppearanceBody2"
+         />
+     <View
+         android:layout_width="match_parent"
+         android:layout_height="1dp"
+         android:background="@color/gray"
+         android:layout_marginBottom="@dimen/space"
+         />
+</LinearLayout>

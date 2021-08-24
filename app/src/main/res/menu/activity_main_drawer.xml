@@ -24,6 +24,12 @@
             android:icon="@drawable/ic_menu_camera"
             android:title="About us"
             />
+
+        <item
+            android:id="@+id/nav_add_product"
+            android:icon="@drawable/ic_menu_camera"
+            android:title="Add a product"
+            />
     </group>
 
 </menu>

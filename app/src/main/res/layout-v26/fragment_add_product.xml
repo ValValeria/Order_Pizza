@@ -49,12 +49,15 @@
             android:layout_height="wrap_content"
             android:paddingTop="@dimen/space"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:tooltipText="Press enter to add ingredient"
             android:hint="@string/ingredients">
+
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/ingredientsInput"
                 />
+
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.chip.ChipGroup

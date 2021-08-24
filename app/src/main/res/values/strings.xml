@@ -25,13 +25,10 @@
     <string name="secondary_text">Secondary title</string>
     <string name="supporting_text">Supporting text</string>
     <string name="view">View</string>
-    <string name="title">Title</string>
     <string name="dummy_text">"That doesn't remind us that our storage is public, as it does in firebase database. Are you sure this is the only way of making it public? "</string>
     <string name="order">Order</string>
-    <string name="ingredients">Ingredients</string>
     <string name="ingredient">Ingredient</string>
     <string name="login_with_google">Login with google</string>
-    <string name="submit">Submit</string>
     <string name="add_a_new_recipy">Add a new recipy</string>
     <string name="ingredients">Ingredients</string>
     <string name="description">Description</string>
@@ -39,4 +36,6 @@
     <string name="weight">Weight</string>
     <string name="price">Price</string>
     <string name="upload_a_file">Upload a file</string>
+    <string name="your_ingredients_go_here">Your ingredients go here</string>
+    <string name="title">Title</string>
 </resources>

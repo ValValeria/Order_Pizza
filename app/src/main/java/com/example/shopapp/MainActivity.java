@@ -48,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case R.id.nav_about_us:
                     navController.navigate(R.id.nav_about);
+                case R.id.nav_add_product:
+                    navController.navigate(R.id.nav_add_product_page);
             }
 
             drawerLayout.close();

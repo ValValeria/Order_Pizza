@@ -14,6 +14,9 @@ import com.example.shopapp.R;
 import com.example.shopapp.adapters.ErrorsAdapter;
 import com.example.shopapp.validators.AuthValidator;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +30,8 @@ public class LoginFragment extends Fragment {
     private List<String> errors = new ArrayList<>();
     private ErrorsAdapter errorAdapter;
     private final PublishSubject<String> source = PublishSubject.create();
+    private FirebaseAuth firebaseAuth;
+    private FirebaseUser firebaseUser;
 
     public LoginFragment(){
         super(R.layout.fragment_login);
@@ -38,10 +43,13 @@ public class LoginFragment extends Fragment {
 
         navController = Navigation.findNavController(getActivity().findViewById(R.id.nav_host_fragment));
 
+        firebaseAuth = FirebaseAuth.getInstance();
+        firebaseUser = firebaseAuth.getCurrentUser();
+
         Button button = getActivity().findViewById(R.id.login_btn);
         button.setOnClickListener(this::login);
 
-        if(null != null){
+        if(firebaseUser != null){
             Toast.makeText(getContext(), "You have already authenticated", Toast.LENGTH_LONG).show();
 
             view.postDelayed( () -> {
@@ -65,7 +73,17 @@ public class LoginFragment extends Fragment {
         authValidator.validate();
 
         if(authValidator.getErrors().size() == 0){
-
+            firebaseAuth.signInWithEmailAndPassword(email,password)
+                     .addOnCompleteListener(requireActivity(), task -> {
+                         if (task.isSuccessful()) {
+                             Navigation.findNavController(requireActivity(), R.id.nav_host_fragment).navigate(R.id.nav_home);
+                         } else {
+                             view.post(()->{
+                                 Toast.makeText(getActivity(), "You are not in our database",
+                                         Toast.LENGTH_SHORT).show();
+                             });
+                         }
+                     });
         } else {
             this.errors.add("Please, check the validity of fields");
         }

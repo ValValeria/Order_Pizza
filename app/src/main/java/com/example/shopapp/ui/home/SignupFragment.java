@@ -13,13 +13,21 @@ import android.widget.Button;
 import android.widget.Toast;
 import com.example.shopapp.R;
 import com.example.shopapp.validators.AuthValidator;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 
 public class SignupFragment extends Fragment {
     private NavController navController;
+    private FirebaseAuth mAuth;
+    private FirebaseUser firebaseUser;
 
     @Override
     public void onViewCreated(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
@@ -29,6 +37,16 @@ public class SignupFragment extends Fragment {
         button.setOnClickListener(this::signUp);
 
         navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
+        mAuth = FirebaseAuth.getInstance();
+        firebaseUser = mAuth.getCurrentUser();
+
+        if(firebaseUser != null){
+            Toast.makeText(getContext(), "You have already authenticated", Toast.LENGTH_LONG).show();
+
+            view.postDelayed( () -> {
+                navController.navigate(R.id.nav_home);
+            },1000);
+        }
     }
 
     @Override
@@ -48,9 +66,29 @@ public class SignupFragment extends Fragment {
         authValidator.validate();
 
         if(authValidator.getErrors().size() == 0){
+            mAuth.createUserWithEmailAndPassword(email, password).
+                    addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            view.post(()->{
+                                Toast.makeText(getActivity(), "Authentication is successful.",
+                                        Toast.LENGTH_SHORT).show();
 
+                                goHome();
+                            });
+                        } else {
+                            view.post(()->{
+                                Toast.makeText(getActivity(), "Authentication failed. Please change the email",
+                                        Toast.LENGTH_SHORT).show();
+                            });
+                        }
+                    });
         } else {
             Toast.makeText(getContext(), "Check the validity of fields", Toast.LENGTH_LONG).show();
         }
+    }
+
+    private void goHome(){
+        NavController navController = Navigation.findNavController(getActivity(),R.id.nav_host_fragment);
+        navController.navigate(R.id.nav_home);
     }
 }

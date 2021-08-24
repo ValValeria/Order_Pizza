@@ -41,6 +41,7 @@ public class MyService extends Service {
             public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
                 for ( DataSnapshot datasnapshot: snapshot.getChildren()) {
                     Product product = datasnapshot.getValue(Product.class);
+                    product.setId(datasnapshot.getKey());
 
                     if(product != null){
                         newProductEvent.onNext(product);

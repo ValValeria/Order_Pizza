@@ -43,7 +43,6 @@ public class HomeFragment extends Fragment{
     super.onStart();
 
     progressBar = requireActivity().findViewById(R.id.progressBar);
-    progressBar.setVisibility(ProgressBar.INVISIBLE);
 
     linearLayout = requireActivity().findViewById(R.id.container);
 
@@ -59,6 +58,7 @@ public class HomeFragment extends Fragment{
     MyService.newProductEvent.subscribe(v -> {
         if(atomicInteger.get() < PER_PAGE){
            addCardsToView(v);
+           progressBar.setVisibility(ProgressBar.INVISIBLE);
         }
 
         atomicInteger.incrementAndGet();

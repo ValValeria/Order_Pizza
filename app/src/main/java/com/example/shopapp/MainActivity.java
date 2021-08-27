@@ -12,10 +12,14 @@ import androidx.navigation.Navigation;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
+import io.reactivex.rxjava3.subjects.PublishSubject;
+
 
 public class MainActivity extends AppCompatActivity {
     private NavigationView navigationView;
     private DrawerLayout drawerLayout;
+    public static PublishSubject<Void> chooseFile = PublishSubject.create();
+    static final int REQUEST_IMAGE_GET = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,9 +27,7 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
-
-        Intent intent = new Intent(this, MyService.class);
-        startService(intent);
+        startService(new Intent(this, MyService.class));
     }
 
     @Override
@@ -66,8 +68,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId() == R.id.action_menu) {
-           drawerLayout.open();
+        switch(item.getItemId()){
+            case R.id.action_menu:
+                drawerLayout.open();
+                break;
+            case R.id.action_search:
+                return false;
         }
 
         return true;

@@ -9,6 +9,16 @@ public final class Product {
     private String ingredients;
     private int weight;
 
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    private String image;
+
     public String getId() {
         return id;
     }

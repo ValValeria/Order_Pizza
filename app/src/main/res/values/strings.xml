@@ -38,4 +38,7 @@
     <string name="upload_a_file">Upload a file</string>
     <string name="your_ingredients_go_here">Your ingredients go here</string>
     <string name="title">Title</string>
+    <string name="search">Search</string>
+    <string name="_404">404</string>
+    <string name="sorry_but_there_are_not_products">Sorry! But there are not products</string>
 </resources>

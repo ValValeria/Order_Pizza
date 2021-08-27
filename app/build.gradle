@@ -39,6 +39,7 @@ dependencies {
     implementation 'org.jetbrains:annotations:15.0'
     implementation 'com.google.firebase:firebase-database:20.0.1'
     implementation 'com.google.firebase:firebase-auth:20.0.1'
+    implementation 'com.google.firebase:firebase-storage:20.0.0'
     testImplementation 'junit:junit:4.+'
     implementation 'mysql:mysql-connector-java:8.0.25'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

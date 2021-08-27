@@ -19,6 +19,13 @@
         style="@style/TextAppearance.AppCompat.Headline"
         />
 
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/space_half"
+        />
+
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -33,6 +40,7 @@
             android:layout_width="match_parent"
             android:padding="@dimen/space_half"
             >
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

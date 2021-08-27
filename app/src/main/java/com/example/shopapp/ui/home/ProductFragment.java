@@ -1,5 +1,7 @@
 package com.example.shopapp.ui.home;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -11,17 +13,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.example.shopapp.R;
 import com.example.shopapp.models.Product;
 import com.example.shopapp.services.MyService;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
@@ -34,10 +40,16 @@ public class ProductFragment extends Fragment {
     private LayoutInflater layoutInflater;
     private DatabaseReference dbReference;
     private String key;
+    final long ONE_MEGABYTE = 1024 * 1024;
+    private FirebaseStorage firebaseStorage;
+    private StorageReference storageReference;
 
     @Override
     public void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        firebaseStorage = FirebaseStorage.getInstance();
+        storageReference = firebaseStorage.getReference();
 
         key = requireArguments().getString("key");
         navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
@@ -54,6 +66,17 @@ public class ProductFragment extends Fragment {
 
                     TextView textView1 = getActivity().findViewById(R.id.descr);
                     textView1.setText(product.getDescription());
+
+                    ImageView imageView = getActivity().findViewById(R.id.imageView);
+                    StorageReference imageRef = storageReference.child(product.getImage());
+
+                    imageRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                        @Override
+                        public void onSuccess(byte[] bytes) {
+                            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                            imageView.setImageBitmap(bitmap);
+                        }
+                    });
 
                     Button button = getActivity().findViewById(R.id.textButton);
                     button.setOnClickListener(ProductFragment.this::buyProduct);

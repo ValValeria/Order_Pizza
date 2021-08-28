@@ -1,4 +1,11 @@
 <resources>
+    <string name="admin_email">
+        adminadmin@g.com
+    </string>
+    <string name="admin_password">
+        1725
+    </string>
+
     <string name="app_name">Shop app</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -41,4 +48,9 @@
     <string name="search">Search</string>
     <string name="_404">404</string>
     <string name="sorry_but_there_are_not_products">Sorry! But there are not products</string>
+    <string name="signup_i">Signup</string>
+    <string name="add_a_product">Add a product</string>
+    <string name="the_image_of_dish">The image of dish</string>
+    <string name="search_hint">Type here ...</string>
+    <string name="app_label">Dishes</string>
 </resources>

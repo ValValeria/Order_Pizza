@@ -23,13 +23,14 @@
             android:textAlignment="center"
             android:textSize="20sp"
             android:text="@string/home_fragment_title"
-            android:textAppearance="?attr/textAppearanceCaption"
-            android:paddingBottom="@dimen/space"
+            android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+            android:paddingBottom="@dimen/space_half"
             android:textAllCaps="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:gravity="center_horizontal" />
+
         <ProgressBar
             android:layout_gravity="center_horizontal"
             android:id="@+id/progressBar"

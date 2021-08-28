@@ -1,5 +1,6 @@
 package com.example.shopapp.ui.home;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
@@ -20,6 +21,9 @@ import com.example.shopapp.R;
 import com.example.shopapp.models.Product;
 import com.example.shopapp.services.MyService;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -67,19 +71,31 @@ public class HomeFragment extends Fragment{
     linearLayout.removeAllViews();
     linearLayout.invalidate();
 
+    noResultLayout = requireActivity().findViewById(R.id.home_content);
+
     AtomicInteger atomicInteger = new AtomicInteger(0);
 
-    progressBar.setVisibility(ProgressBar.INVISIBLE);
-    addNoResultView();
+    FirebaseDatabase database = FirebaseDatabase.getInstance();
+    DatabaseReference databaseReference = database.getReference(MyService.PRODUCT_KEY);
 
-    MyService.newProductEvent.subscribe(v -> {
-        if(atomicInteger.get() < PER_PAGE){
-           addCardsToView(v);
-           progressBar.setVisibility(ProgressBar.INVISIBLE);
-           hideNoResultView();
+    databaseReference.get().addOnSuccessListener(dataSnapshot -> {
+        if(!dataSnapshot.hasChildren()){
+            addNoResultView();
+        } else {
+            noResultLayout.removeView(noResultView);
         }
 
-        atomicInteger.incrementAndGet();
+        noResultLayout.removeView(progressBar);
+        noResultLayout.invalidate();
+
+        for ( DataSnapshot datasnapshot: dataSnapshot.getChildren()) {
+            Product product = datasnapshot.getValue(Product.class);
+            product.setId(datasnapshot.getKey());
+
+            if(atomicInteger.get() < PER_PAGE){
+                addCardsToView(product);
+            }
+        }
     });
   }
 
@@ -101,7 +117,17 @@ public class HomeFragment extends Fragment{
       });
 
       title.setText(product.getTitle());
-      short_text.setText(product.getDescription().substring(0, 20));
+
+      String txt;
+
+      if(product.getDescription().length() > 20){
+          txt = product.getDescription().substring(0, 20);
+      } else {
+          txt = product.getDescription();
+      }
+
+      short_text.setText(txt);
+
       button.setOnClickListener((view1) -> {
           Bundle bundle = new Bundle();
           bundle.putString("key", product.getId().toString());
@@ -113,13 +139,8 @@ public class HomeFragment extends Fragment{
   }
 
   private void addNoResultView(){
-      noResultLayout = requireActivity().findViewById(R.id.home_content);
       noResultView = LayoutInflater.from(requireContext()).inflate(R.layout.empty_results, linearLayout, false);
 
       noResultLayout.addView(noResultView);
-  }
-
-  private void hideNoResultView(){
-      noResultLayout.removeView(noResultView);
   }
 }

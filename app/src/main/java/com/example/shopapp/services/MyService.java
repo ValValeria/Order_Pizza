@@ -43,9 +43,9 @@ public class MyService extends Service {
                     Product product = datasnapshot.getValue(Product.class);
                     product.setId(datasnapshot.getKey());
 
-                    if(product != null){
-                        newProductEvent.onNext(product);
-                    }
+                    newProductEvent.onNext(product);
+
+                    System.out.println("The product is loaded");
                 }
             }
 

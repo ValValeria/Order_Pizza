@@ -90,7 +90,7 @@ public class ProductFragment extends Fragment {
                             TextView textView = view.findViewById(R.id.textIngredient);
                             textView.setText(ingredients.getString(i));
 
-                            linearLayout.addView(textView);
+                            linearLayout.addView(view);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();

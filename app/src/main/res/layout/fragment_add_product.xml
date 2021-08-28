@@ -15,7 +15,7 @@
         >
         <TextView
             android:paddingTop="@dimen/space"
-            android:paddingBottom="@dimen/space_half"
+            android:paddingBottom="@dimen/space"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/add_a_new_recipy"
@@ -24,6 +24,16 @@
             android:textAlignment="center"
             android:textAllCaps="true"
             />
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:id="@+id/imageView"
+            android:src="@drawable/ic_pizza"
+            android:maxHeight="100dp"
+            android:scaleType="fitCenter"
+            android:cropToPadding="true"
+            android:layout_height="194dp"
+            android:contentDescription="@string/the_image_of_dish" />
 
         <com.google.android.material.textfield.TextInputLayout
             app:endIconMode="clear_text"

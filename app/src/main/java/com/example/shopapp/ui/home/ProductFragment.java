@@ -2,10 +2,12 @@ package com.example.shopapp.ui.home;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -28,10 +30,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
+
 
 
 public class ProductFragment extends Fragment {
@@ -57,8 +59,9 @@ public class ProductFragment extends Fragment {
         dbReference = FirebaseDatabase.getInstance().getReference(MyService.PRODUCT_KEY);
 
         dbReference.child(key).addValueEventListener(new ValueEventListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
-            public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
+            public void onDataChange(@NotNull DataSnapshot snapshot) {
                 if(!snapshot.exists()){
                     navController.navigate(R.id.nav_home);
                 } else {
@@ -67,15 +70,14 @@ public class ProductFragment extends Fragment {
                     TextView textView1 = getActivity().findViewById(R.id.descr);
                     textView1.setText(product.getDescription());
 
-                    ImageView imageView = getActivity().findViewById(R.id.imageView);
-                    StorageReference imageRef = storageReference.child(product.getImage());
+                    String[] paths = product.getImage().split("/");
 
-                    imageRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                        @Override
-                        public void onSuccess(byte[] bytes) {
-                            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                            imageView.setImageBitmap(bitmap);
-                        }
+                    ImageView imageView = getActivity().findViewById(R.id.imageView);
+                    StorageReference imageRef = storageReference.child(paths[paths.length - 1]);
+
+                    imageRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(bytes -> {
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                        imageView.setImageBitmap(bitmap);
                     });
 
                     Button button = getActivity().findViewById(R.id.textButton);

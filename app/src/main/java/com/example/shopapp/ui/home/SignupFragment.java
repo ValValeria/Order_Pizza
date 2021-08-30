@@ -6,6 +6,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -80,10 +82,20 @@ public class SignupFragment extends Fragment {
                                 Toast.makeText(getActivity(), "Authentication failed. Please change the email",
                                         Toast.LENGTH_SHORT).show();
                             });
+
+                            Log.e(SignupFragment.class.getName(), task.getException().getMessage());
                         }
                     });
         } else {
-            Toast.makeText(getContext(), "Check the validity of fields", Toast.LENGTH_LONG).show();
+            StringBuilder stringBuilder = new StringBuilder("Check the validity of fields.");
+
+            for (int i = 0; i < authValidator.getErrors().size(); i++) {
+                String error = authValidator.getErrors().get(i);
+
+                stringBuilder = stringBuilder.append(error);
+            }
+
+            Toast.makeText(getContext(), stringBuilder.toString(), Toast.LENGTH_LONG).show();
         }
     }
 

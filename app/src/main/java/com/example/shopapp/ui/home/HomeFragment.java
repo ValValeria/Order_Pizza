@@ -1,11 +1,9 @@
 package com.example.shopapp.ui.home;
 
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import com.example.shopapp.R;
@@ -28,6 +27,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import org.jetbrains.annotations.NotNull;
+
+import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -41,6 +42,7 @@ public class HomeFragment extends Fragment{
   final long ONE_MEGABYTE = 1024 * 1024;
   private LinearLayout noResultLayout;
   private View noResultView;
+  LinkedList<String> linkedList = new LinkedList();
 
   @Override
   public void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
@@ -78,24 +80,27 @@ public class HomeFragment extends Fragment{
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference databaseReference = database.getReference(MyService.PRODUCT_KEY);
 
-    databaseReference.get().addOnSuccessListener(dataSnapshot -> {
-        if(!dataSnapshot.hasChildren()){
-            addNoResultView();
-        } else {
-            noResultLayout.removeView(noResultView);
-        }
-
-        noResultLayout.removeView(progressBar);
-        noResultLayout.invalidate();
-
-        for ( DataSnapshot datasnapshot: dataSnapshot.getChildren()) {
-            Product product = datasnapshot.getValue(Product.class);
-            product.setId(datasnapshot.getKey());
-
-            if(atomicInteger.get() < PER_PAGE){
-                addCardsToView(product);
+    getView().post(() -> {
+        databaseReference.get().addOnSuccessListener(dataSnapshot -> {
+            if(!dataSnapshot.hasChildren()){
+                addNoResultView();
+            } else {
+                noResultLayout.removeView(noResultView);
             }
-        }
+
+            noResultLayout.removeView(progressBar);
+            noResultLayout.invalidate();
+
+            for ( DataSnapshot datasnapshot: dataSnapshot.getChildren()) {
+                Product product = datasnapshot.getValue(Product.class);
+                product.setId(datasnapshot.getKey());
+
+                if(atomicInteger.get() < PER_PAGE && !linkedList.contains(product.getId())){
+                    addCardsToView(product);
+                    linkedList.add(product.getId());
+                }
+            }
+        });
     });
   }
 
@@ -142,5 +147,16 @@ public class HomeFragment extends Fragment{
       noResultView = LayoutInflater.from(requireContext()).inflate(R.layout.empty_results, linearLayout, false);
 
       noResultLayout.addView(noResultView);
+  }
+
+  @Override
+  public void onResume() {
+    super.onResume();
+
+    linkedList.clear();
+
+    if(linkedList.size() < PER_PAGE){
+        this.loadData();
+    }
   }
 }

@@ -53,4 +53,6 @@
     <string name="the_image_of_dish">The image of dish</string>
     <string name="search_hint">Type here ...</string>
     <string name="app_label">Dishes</string>
+    <string name="our_orders">Our orders</string>
+    <string name="orders">Orders</string>
 </resources>

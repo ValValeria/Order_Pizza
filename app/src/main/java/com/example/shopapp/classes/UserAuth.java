@@ -4,6 +4,7 @@ import com.example.shopapp.R;
 import com.example.shopapp.config.Roles;
 import com.example.shopapp.models.User;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import io.reactivex.rxjava3.subjects.PublishSubject;
 
@@ -14,32 +15,31 @@ public class UserAuth {
     private boolean isAdmin = false;
     public static final PublishSubject<User> userAuth = PublishSubject.create();
 
-    public UserAuth(String email, String password){
+    public UserAuth(){
         firebaseAuth = FirebaseAuth.getInstance();
 
-        this.login(email, password);
+        checkUser();
     }
 
-    public UserAuth(){}
+    public void checkUser(){
+        FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
 
-    public void login(String email, String password){
-        this.firebaseAuth.signInWithEmailAndPassword(email, password)
-                .addOnSuccessListener(authResult -> {
-                    UserAuth.this.isAuth = true;
-                    UserAuth.this.user.setEmail(email);
-                    UserAuth.this.user.setPassword(email);
+        if(firebaseUser != null){
+            UserAuth.this.isAuth = true;
+            UserAuth.this.user.setEmail(firebaseUser.getEmail());
+            UserAuth.this.user.setPassword("");
 
-                    String adminEmail = Resources.getSystem().getString(R.string.admin_email);
-                    String adminPassword = Resources.getSystem().getString(R.string.admin_password);;
+            String adminEmail = "adminadmin@gmc.com";
+            String adminPassword = "73636hdhdhcg";
 
-                    if(UserAuth.this.user.getEmail().equalsIgnoreCase(adminEmail)
-                            && UserAuth.this.user.getPassword().equals(adminPassword)){
-                        UserAuth.this.isAdmin = true;
-                        UserAuth.this.user.setRole(Roles.ADMIN);
-                    } else {
-                        UserAuth.this.user.setRole(Roles.USER);
-                    }
-                });
+            if(UserAuth.this.user.getEmail().equalsIgnoreCase(adminEmail)
+                    && UserAuth.this.user.getPassword().equals(adminPassword)){
+                UserAuth.this.isAdmin = true;
+                UserAuth.this.user.setRole(Roles.ADMIN);
+            } else {
+                UserAuth.this.user.setRole(Roles.USER);
+            }
+        }
     }
 
     public boolean isAuth() {

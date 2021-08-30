@@ -1,18 +1,27 @@
 package com.example.shopapp.models;
 
 public class Order {
-    private String username;
+    private String key;
+    private String email;
     private int count;
     private String dishKey;
     private String time;
     private String status;
 
-    public String getUsername() {
-        return username;
+    public String getKey() {
+        return key;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String username) {
+        this.email = username;
     }
 
     public int getCount() {

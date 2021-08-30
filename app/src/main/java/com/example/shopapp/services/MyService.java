@@ -20,6 +20,7 @@ import io.reactivex.rxjava3.subjects.PublishSubject;
 public class MyService extends Service {
     private DatabaseReference dbProductRef;
     public final static String PRODUCT_KEY = "product";
+    public final static String ORDER_KEY = "order";
     public static PublishSubject<Product> newProductEvent = PublishSubject.create();
 
     @Override

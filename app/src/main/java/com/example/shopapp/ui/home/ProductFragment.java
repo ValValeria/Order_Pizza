@@ -2,6 +2,7 @@ package com.example.shopapp.ui.home;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.icu.text.RelativeDateTimeFormatter;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -19,7 +20,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.shopapp.MainActivity;
 import com.example.shopapp.R;
+import com.example.shopapp.classes.UserAuth;
+import com.example.shopapp.config.OrderStatus;
+import com.example.shopapp.models.Order;
 import com.example.shopapp.models.Product;
 import com.example.shopapp.services.MyService;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -34,6 +40,13 @@ import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public class ProductFragment extends Fragment {
@@ -45,6 +58,9 @@ public class ProductFragment extends Fragment {
     final long ONE_MEGABYTE = 1024 * 1024;
     private FirebaseStorage firebaseStorage;
     private StorageReference storageReference;
+    private AtomicBoolean atomicBoolean = new AtomicBoolean(false);
+    private UserAuth userAuth;
+    private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
 
     @Override
     public void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
@@ -56,7 +72,7 @@ public class ProductFragment extends Fragment {
         key = requireArguments().getString("key");
         navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
         layoutInflater = LayoutInflater.from(getContext());
-        dbReference = FirebaseDatabase.getInstance().getReference(MyService.PRODUCT_KEY);
+        dbReference = firebaseDatabase.getReference(MyService.PRODUCT_KEY);
 
         dbReference.child(key).addValueEventListener(new ValueEventListener() {
             @RequiresApi(api = Build.VERSION_CODES.O)
@@ -105,6 +121,11 @@ public class ProductFragment extends Fragment {
                navController.navigate(R.id.nav_home);
             }
         });
+
+        MainActivity.userAuth.subscribe(v -> {
+          atomicBoolean.set(v.isAuth());
+          userAuth = v;
+        });
     }
 
     @Override
@@ -113,7 +134,33 @@ public class ProductFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_product, container, false);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public void buyProduct(View view){
-        Toast.makeText(getContext(), "The product is added to the cart", Toast.LENGTH_LONG).show();
+        if(atomicBoolean.get() && userAuth != null){
+            Order order = new Order();
+            order.setStatus(OrderStatus.UNVERIFIED.toString());
+            order.setEmail(userAuth.getUser().getEmail());
+            order.setCount(1);
+
+            Calendar calendar = new GregorianCalendar();
+            Date date = calendar.getTime();
+            order.setTime(date.toString());
+
+            DatabaseReference orderReference = firebaseDatabase.getReference(MyService.ORDER_KEY);
+
+            String key = orderReference.push().getKey();
+            order.setKey(key);
+
+            getView().post(() -> {
+                orderReference.push().setValue(order).addOnSuccessListener(v -> {
+                    Toast.makeText(getContext(), "The product is added to the cart", Toast.LENGTH_LONG).show();
+                }).addOnFailureListener(v -> {
+                    v.printStackTrace();
+                    Toast.makeText(getContext(), "Please, try later again", Toast.LENGTH_LONG).show();
+                });
+            });
+        } else {
+            navController.navigate(R.id.nav_login);
+        }
     }
 }

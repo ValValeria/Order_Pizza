@@ -1,13 +1,11 @@
 package com.example.shopapp;
 
-import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.Menu;
-import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
@@ -15,8 +13,6 @@ import android.widget.SearchView;
 import com.example.shopapp.classes.UserAuth;
 import com.example.shopapp.models.Product;
 import com.example.shopapp.services.MyService;
-import com.example.shopapp.ui.home.SearchFragment;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -24,6 +20,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentContainerView;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -31,16 +28,19 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.fragment.NavHostFragment;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
+import io.reactivex.rxjava3.subjects.BehaviorSubject;
 import io.reactivex.rxjava3.subjects.PublishSubject;
+import io.reactivex.rxjava3.subjects.ReplaySubject;
 
 
 public class MainActivity extends AppCompatActivity {
     private NavigationView navigationView;
     private DrawerLayout drawerLayout;
-    public static PublishSubject<UserAuth> userAuth = PublishSubject.create();
+    public static BehaviorSubject<UserAuth> userAuth = BehaviorSubject.create();
     public static PublishSubject<Product> search = PublishSubject.create();
     private UserAuth userAuthObj;
     private FragmentContainerView fragmentContainerView;
@@ -57,16 +57,6 @@ public class MainActivity extends AppCompatActivity {
         fragmentContainerView = findViewById(R.id.nav_host_fragment);
 
         startService(new Intent(this, MyService.class));
-
-        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-
-        if(firebaseUser != null){
-            userAuthObj = new UserAuth(firebaseUser.getEmail(), "");
-        } else {
-            userAuthObj = new UserAuth();
-        }
-
-        userAuth.onNext(userAuthObj);
     }
 
 
@@ -86,9 +76,11 @@ public class MainActivity extends AppCompatActivity {
         searchView.setQueryHint(getString(R.string.search_hint));
 
         searchView.setOnCloseListener(() -> {
-            navController.navigate(R.id.nav_home);
+            if(!navController.popBackStack()){
+                navController.navigate(R.id.nav_home);
+            }
 
-            return false;
+            return true;
         });
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -140,14 +132,22 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case R.id.nav_about_us:
                     navController.navigate(R.id.nav_about);
+                    break;
                 case R.id.nav_add_product:
                     navController.navigate(R.id.nav_add_product_page);
+                    break;
+                case R.id.nav_orders:
+                    navController.navigate(R.id.nav_order);
+                    break;
             }
 
             drawerLayout.close();
 
             return true;
         });
+
+        userAuthObj = new UserAuth();
+        userAuth.onNext(userAuthObj);
     }
 
     @Override

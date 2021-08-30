@@ -14,9 +14,9 @@ public class AuthValidator {
     }
 
     public boolean validate(){
-        if(!(email.length() > 10)){
+        if(email.length() < 10){
             this.errors.add("Invalid size of email. Min length of email is 10");
-        } else if(!(email.length() < 20)){
+        } else if(email.length() > 20){
             this.errors.add("Invalid size of email. Max length of email is 20");
         } else if(!(password.length() > 10)){
             this.errors.add("Invalid size of password. Min length of password is 10");

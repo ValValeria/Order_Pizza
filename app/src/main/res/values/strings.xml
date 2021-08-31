@@ -55,4 +55,9 @@
     <string name="app_label">Dishes</string>
     <string name="our_orders">Our orders</string>
     <string name="orders">Orders</string>
+    <string name="delete_an_order">Delete an order</string>
+    <string name="there_are_no_orders">There are no orders</string>
+    <string name="order_new_dishes_in_our_app">Order new dishes in our app</string>
+    <string name="visit_the_page">Visit the page</string>
+    <string name="your_orders">Your orders</string>
 </resources>

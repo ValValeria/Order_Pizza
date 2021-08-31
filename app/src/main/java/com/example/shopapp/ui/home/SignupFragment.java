@@ -13,7 +13,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
+
+import com.example.shopapp.MainActivity;
 import com.example.shopapp.R;
+import com.example.shopapp.classes.UserAuth;
 import com.example.shopapp.validators.AuthValidator;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -72,6 +75,9 @@ public class SignupFragment extends Fragment {
                     addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             view.post(()->{
+                                UserAuth userAuth = new UserAuth();
+                                MainActivity.userAuth.onNext(userAuth);
+
                                 Toast.makeText(getActivity(), "Authentication is successful.",
                                         Toast.LENGTH_SHORT).show();
 

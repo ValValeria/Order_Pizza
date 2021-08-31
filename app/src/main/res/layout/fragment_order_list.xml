@@ -5,13 +5,14 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="@dimen/space_twice"
+    android:id="@+id/main_container"
     tools:context=".ui.home.OrderList">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:text="@string/our_orders"
+        android:text="@string/your_orders"
         android:textAppearance="@style/TextAppearance.AppCompat.Headline"
         android:textAlignment="center"
         android:textAllCaps="true"
@@ -19,4 +20,75 @@
         android:paddingBottom="@dimen/space"
         android:gravity="center_horizontal" />
 
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/no_orders"
+        android:layout_marginTop="@dimen/space"
+        android:layout_marginBottom="@dimen/space"
+        >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/space_half"
+            >
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/there_are_no_orders"
+                android:textAlignment="center"
+                android:layout_gravity="center"
+                android:paddingBottom="@dimen/space_half"
+                style="@style/TextAppearance.MaterialComponents.Headline6"
+                />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/order_new_dishes_in_our_app"
+                android:textAlignment="center"
+                android:layout_gravity="center"
+                android:paddingBottom="@dimen/space_half"
+                style="@style/TextAppearance.AppCompat.Body2"
+                />
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                >
+                <Button
+                    android:id="@+id/visitOrderPage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/order"
+                    android:backgroundTint="@color/orange"
+                    />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:id="@+id/space_for_orders"
+        >
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/submit_orders"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/submit"
+            android:backgroundTint="@color/orange"
+            />
+    </LinearLayout>
 </LinearLayout>

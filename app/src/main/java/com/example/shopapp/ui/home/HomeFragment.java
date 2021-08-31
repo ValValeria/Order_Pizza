@@ -38,7 +38,7 @@ public class HomeFragment extends Fragment{
   private LinearLayout linearLayout;
   private FirebaseStorage firebaseStorage;
   private StorageReference storageReference;
-  private final int PER_PAGE = 3;
+  private final int PER_PAGE = 50;
   final long ONE_MEGABYTE = 1024 * 1024;
   private LinearLayout noResultLayout;
   private View noResultView;
@@ -89,7 +89,6 @@ public class HomeFragment extends Fragment{
             }
 
             noResultLayout.removeView(progressBar);
-            noResultLayout.invalidate();
 
             for ( DataSnapshot datasnapshot: dataSnapshot.getChildren()) {
                 Product product = datasnapshot.getValue(Product.class);
@@ -100,6 +99,8 @@ public class HomeFragment extends Fragment{
                     linkedList.add(product.getId());
                 }
             }
+
+            noResultLayout.invalidate();
         });
     });
   }
@@ -110,15 +111,14 @@ public class HomeFragment extends Fragment{
       TextView short_text = view.findViewById(R.id.supporting_text);
       Button button = view.findViewById(R.id.btn);
 
-      ImageView imageView = view.findViewById(R.id.imageView);
-      StorageReference imageRef = storageReference.child(product.getImage());
+      String[] paths = product.getImage().split("/");
 
-      imageRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-          @Override
-          public void onSuccess(byte[] bytes) {
-              Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-              imageView.setImageBitmap(bitmap);
-          }
+      ImageView imageView = requireActivity().findViewById(R.id.imageView);
+      StorageReference imageRef = storageReference.child(paths[paths.length - 1]);
+
+      imageRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(bytes -> {
+          Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+          imageView.setImageBitmap(bitmap);
       });
 
       title.setText(product.getTitle());
@@ -154,9 +154,6 @@ public class HomeFragment extends Fragment{
     super.onResume();
 
     linkedList.clear();
-
-    if(linkedList.size() < PER_PAGE){
-        this.loadData();
-    }
+    loadData();
   }
 }

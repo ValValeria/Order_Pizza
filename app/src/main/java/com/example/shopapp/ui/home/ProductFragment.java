@@ -150,6 +150,7 @@ public class ProductFragment extends Fragment {
 
             String key = orderReference.push().getKey();
             order.setKey(key);
+            order.setDishKey(product.getId());
 
             getView().post(() -> {
                 orderReference.push().setValue(order).addOnSuccessListener(v -> {

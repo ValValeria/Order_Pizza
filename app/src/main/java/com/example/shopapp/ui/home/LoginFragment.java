@@ -10,8 +10,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+
+import com.example.shopapp.MainActivity;
 import com.example.shopapp.R;
 import com.example.shopapp.adapters.ErrorsAdapter;
+import com.example.shopapp.classes.UserAuth;
 import com.example.shopapp.validators.AuthValidator;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
@@ -32,7 +35,6 @@ public class LoginFragment extends Fragment {
     private final PublishSubject<String> source = PublishSubject.create();
     private FirebaseAuth firebaseAuth;
     private FirebaseUser firebaseUser;
-
     public LoginFragment(){
         super(R.layout.fragment_login);
     }
@@ -76,6 +78,9 @@ public class LoginFragment extends Fragment {
             firebaseAuth.signInWithEmailAndPassword(email,password)
                      .addOnCompleteListener(requireActivity(), task -> {
                          if (task.isSuccessful()) {
+                             UserAuth userAuth = new UserAuth();
+                             MainActivity.userAuth.onNext(userAuth);
+
                              Navigation.findNavController(requireActivity(), R.id.nav_host_fragment).navigate(R.id.nav_home);
                          } else {
                              view.post(()->{

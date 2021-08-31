@@ -9,6 +9,7 @@ import android.view.Menu;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.Toast;
 
 import com.example.shopapp.classes.UserAuth;
 import com.example.shopapp.models.Product;
@@ -66,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
         inflater.inflate(R.menu.main, menu);
         MenuItem searchMenuItem = menu.findItem(R.id.action_search);
         setupSearchView(searchMenuItem);
+
         return true;
     }
 
@@ -97,6 +99,8 @@ public class MainActivity extends AppCompatActivity {
 
                         if(product.getTitle().contains(query) || product.getDescription().contains(query)){
                             search.onNext(product);
+                        } else {
+                            Toast.makeText(MainActivity.this, "Not found", Toast.LENGTH_LONG).show();
                         }
                     }
                 });
@@ -148,6 +152,23 @@ public class MainActivity extends AppCompatActivity {
 
         userAuthObj = new UserAuth();
         userAuth.onNext(userAuthObj);
+
+        userAuth.subscribe(v -> {
+            userAuthObj = v;
+
+            Menu menu = navigationView.getMenu();
+
+            if(!userAuthObj.isAdmin()){
+                menu.removeItem(R.id.nav_add_product);
+            }
+            if(userAuthObj != null && userAuthObj.isAuth()){
+                menu.removeItem(R.id.nav_login);
+                menu.removeItem(R.id.nav_signup);
+            }
+            if(userAuthObj != null && userAuthObj.isAdmin()){
+                menu.removeItem(R.id.nav_orders);
+            }
+        });
     }
 
     @Override

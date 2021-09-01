@@ -1,6 +1,5 @@
 package com.example.shopapp.classes;
-import android.content.res.Resources;
-import com.example.shopapp.R;
+
 import com.example.shopapp.config.Roles;
 import com.example.shopapp.models.User;
 import com.google.firebase.auth.FirebaseAuth;
@@ -30,10 +29,8 @@ public class UserAuth {
             UserAuth.this.user.setPassword("");
 
             String adminEmail = "adminadmin@gmc.com";
-            String adminPassword = "73636hdhdhcg";
 
-            if(UserAuth.this.user.getEmail().equalsIgnoreCase(adminEmail)
-                    && UserAuth.this.user.getPassword().equals(adminPassword)){
+            if(UserAuth.this.user.getEmail().equalsIgnoreCase(adminEmail)){
                 UserAuth.this.isAdmin = true;
                 UserAuth.this.user.setRole(Roles.ADMIN);
             } else {

@@ -16,6 +16,7 @@ import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -78,8 +79,16 @@ public class ProductFragment extends Fragment {
         firebaseStorage = FirebaseStorage.getInstance();
         storageReference = firebaseStorage.getReference();
 
-        key = requireArguments().getString("key");
+        Intent intent = requireActivity().getIntent(); /// ???
+
+        if(intent != null && intent.getStringExtra(MainActivity.NOTIFICATION_KEY) != null){
+           key = intent.getStringExtra(MainActivity.NOTIFICATION_KEY);
+        }else{
+           key = requireArguments().getString("key");
+        }
+
         navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
+
         layoutInflater = LayoutInflater.from(getContext());
         dbReference = firebaseDatabase.getReference(MyService.PRODUCT_KEY);
 
@@ -159,11 +168,14 @@ public class ProductFragment extends Fragment {
                 Order order = new Order();
 
                 try {
-                     order.setCount(Integer.parseInt(intent.getExtras().getString("number", "0")));
+                     Integer number = Integer.parseInt(intent.getExtras().getString("number", "0"));
+                     order.setCount(number);
                 } catch(NumberFormatException e){
+                     e.printStackTrace();
                      order.setCount(1);
-                     buyProduct(order);
                 }
+
+                buyProduct(order);
 
                 Log.i(ProductFragment.class.getName(), "IntentFilter: " + GetOrdersNumberFragment.intentAction);
             }
@@ -183,8 +195,12 @@ public class ProductFragment extends Fragment {
     }
 
     public void handleOrderClick(View view){
-        GetOrdersNumberFragment getOrdersNumberFragment = new GetOrdersNumberFragment();
-        getOrdersNumberFragment.show(getChildFragmentManager(), "");
+        if(userAuth != null && userAuth.isAuth()){
+            GetOrdersNumberFragment getOrdersNumberFragment = new GetOrdersNumberFragment();
+            getOrdersNumberFragment.show(getChildFragmentManager(), "");
+        } else{
+            navController.navigate(R.id.nav_login);
+        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)

@@ -1,5 +1,6 @@
 package com.example.shopapp;
 
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,15 +13,22 @@ import android.widget.SearchView;
 import android.widget.Toast;
 
 import com.example.shopapp.classes.UserAuth;
+import com.example.shopapp.models.Order;
 import com.example.shopapp.models.Product;
 import com.example.shopapp.services.MyService;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentContainerView;
 import androidx.navigation.NavController;
@@ -29,7 +37,10 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.fragment.NavHostFragment;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -45,8 +56,12 @@ public class MainActivity extends AppCompatActivity {
     public static PublishSubject<Product> search = PublishSubject.create();
     private UserAuth userAuthObj;
     private FragmentContainerView fragmentContainerView;
+    private AtomicBoolean isNotificationsSetUp = new AtomicBoolean(false);
     private LinearLayout linearLayout;
     private ListView searchResult;
+    private static final int NOTIFY_ID = 101;
+    private static String CHANNEL_ID = "Order channel";
+    public static String NOTIFICATION_KEY = "NOTIFICATION_KEY";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,6 +162,8 @@ public class MainActivity extends AppCompatActivity {
                     navController.navigate(R.id.nav_home);
                     FirebaseAuth.getInstance().signOut();
                     break;
+                case R.id.nav_admin:
+                    navController.navigate(R.id.nav_admin);
             }
 
             drawerLayout.close();
@@ -163,18 +180,75 @@ public class MainActivity extends AppCompatActivity {
             Menu menu = navigationView.getMenu();
 
             if(!userAuthObj.isAdmin()){
-                menu.removeItem(R.id.nav_add_product);
-            }
-
-            if(userAuthObj != null && userAuthObj.isAuth()){
-                menu.removeItem(R.id.nav_login);
-                menu.removeItem(R.id.nav_signup);
+                menu.findItem(R.id.nav_add_product).setVisible(false);
+                menu.findItem(R.id.nav_admin).setVisible(false);
             } else {
-                menu.removeItem(R.id.nav_logout);
+                menu.findItem(R.id.nav_add_product).setVisible( true);
+                menu.findItem(R.id.nav_admin).setVisible(true);
             }
 
-            if(userAuthObj != null && userAuthObj.isAdmin()){
-                menu.removeItem(R.id.nav_orders);
+            if(userAuthObj.isAuth()){
+                menu.findItem(R.id.nav_login).setVisible( false);
+                menu.findItem(R.id.nav_signup).setVisible( false);
+                menu.findItem(R.id.nav_logout).setVisible( true);
+            } else {
+                menu.findItem(R.id.nav_login).setVisible(true);
+                menu.findItem(R.id.nav_signup).setVisible(true);
+                menu.findItem(R.id.nav_logout).setVisible(false);
+            }
+
+            if(!userAuthObj.isAdmin() && userAuthObj.isAuth()){
+                menu.findItem(R.id.nav_orders).setVisible(false);
+            } else if(userAuthObj.isAuth()){
+                menu.findItem(R.id.nav_orders).setVisible(true);
+            } else{
+                menu.findItem(R.id.nav_orders).setVisible(false);
+            }
+
+            if(userAuthObj.isAdmin() && !isNotificationsSetUp.get()){
+                setUpNotifications();
+            }
+        });
+    }
+
+    private void setUpNotifications(){
+        isNotificationsSetUp.set(true);
+
+        DatabaseReference dbOrderRef = FirebaseDatabase.getInstance().getReference(MyService.ORDER_KEY);
+        DatabaseReference dbProductRef = FirebaseDatabase.getInstance().getReference(MyService.PRODUCT_KEY);
+
+        dbOrderRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
+                Order order = snapshot.getValue(Order.class);
+                DataSnapshot dataSnapshot = dbProductRef.child(order.getDishKey()).get().getResult();
+
+                if(dataSnapshot.exists()){
+                    Product product = dataSnapshot.getValue(Product.class);
+
+                    Intent notificationIntent = new Intent(MainActivity.this, MainActivity.class);
+                    notificationIntent.putExtra(MainActivity.NOTIFICATION_KEY, product.getId());
+
+                    PendingIntent pendingIntent = PendingIntent.getActivity(MainActivity.this,
+                            0, notificationIntent,
+                            PendingIntent.FLAG_CANCEL_CURRENT);
+
+                    NotificationCompat.Builder builder =
+                            new NotificationCompat.Builder(MainActivity.this, CHANNEL_ID)
+                                    .setContentTitle("New order")
+                                    .setContentText("The number of order is " + order.getCount())
+                                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                                    .addAction(R.drawable.ic_baseline_open_in_new_24, "Visit", pendingIntent);
+
+                    NotificationManagerCompat notificationManager =
+                            NotificationManagerCompat.from(MainActivity.this);
+                    notificationManager.notify(NOTIFY_ID, builder.build());
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull @NotNull DatabaseError error) {
+
             }
         });
     }

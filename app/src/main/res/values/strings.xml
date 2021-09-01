@@ -2,9 +2,15 @@
     <string name="admin_email">
         adminadmin@g.com
     </string>
+
     <string name="admin_password">
         1725
     </string>
+
+    <string-array name="admin_order_options">
+        <item>Order is ready</item>
+        <item>Order is unready</item>
+    </string-array>
 
     <string name="app_name">Shop app</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -64,4 +70,8 @@
     <string name="specify_the_number_of_your_order">Specify the number of your order</string>
     <string name="log_out">Log out</string>
     <string name="delete">Delete</string>
+    <string name="sorry">Sorry</string>
+    <string name="but_there_no_orders">But there no orders</string>
+    <string name="change_the_status_of_order">Change the status of order</string>
+    <string name="admin_panel">Admin panel</string>
 </resources>

@@ -77,7 +77,7 @@ public class HomeFragment extends Fragment{
     public void onStart() {
         super.onStart();
 
-        this.loadData();
+        getView().post(this::loadData);
     }
 
     @Override
@@ -85,7 +85,7 @@ public class HomeFragment extends Fragment{
         super.onResume();
 
         if(isPaused.get()){
-            loadData();
+            getView().post(this::loadData);
         }
     }
 

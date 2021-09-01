@@ -57,4 +57,10 @@
         android:name="com.example.shopapp.ui.home.OrderList"
         android:label="Order list"
         tools:layout="@layout/fragment_order_list" />
+
+    <fragment
+        android:id="@+id/nav_admin"
+        android:name="com.example.shopapp.ui.home.AdminFragment"
+        android:label="Admin"
+        tools:layout="@layout/fragment_admin2" />
 </navigation>

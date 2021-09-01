@@ -1,5 +1,9 @@
 package com.example.shopapp.ui.home;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.icu.text.RelativeDateTimeFormatter;
@@ -12,6 +16,8 @@ import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +34,9 @@ import com.example.shopapp.config.OrderStatus;
 import com.example.shopapp.models.Order;
 import com.example.shopapp.models.Product;
 import com.example.shopapp.services.MyService;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -61,6 +69,7 @@ public class ProductFragment extends Fragment {
     private AtomicBoolean atomicBoolean = new AtomicBoolean(false);
     private UserAuth userAuth;
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+    private LinearLayout btnActionLayout;
 
     @Override
     public void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
@@ -74,94 +83,129 @@ public class ProductFragment extends Fragment {
         layoutInflater = LayoutInflater.from(getContext());
         dbReference = firebaseDatabase.getReference(MyService.PRODUCT_KEY);
 
-        dbReference.child(key).addValueEventListener(new ValueEventListener() {
-            @RequiresApi(api = Build.VERSION_CODES.O)
+        dbReference.child(key).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
             @Override
-            public void onDataChange(@NotNull DataSnapshot snapshot) {
-                if(!snapshot.exists()){
-                    navController.navigate(R.id.nav_home);
-                } else {
-                    Product product = snapshot.getValue(Product.class);
+            public void onComplete(@NonNull @NotNull Task<DataSnapshot> task) {
+                if(task.isSuccessful()){
+                    DataSnapshot snapshot = task.getResult();
 
-                    TextView textView1 = getActivity().findViewById(R.id.descr);
-                    textView1.setText(product.getDescription());
+                    if(!snapshot.exists()){
+                        navController.navigate(R.id.nav_home);
+                    } else {
+                        product = snapshot.getValue(Product.class);
 
-                    String[] paths = product.getImage().split("/");
+                        TextView title = getActivity().findViewById(R.id.title_product);
+                        title.setText(product.getTitle());
 
-                    ImageView imageView = getActivity().findViewById(R.id.imageView);
-                    StorageReference imageRef = storageReference.child(paths[paths.length - 1]);
+                        TextView textView1 = getActivity().findViewById(R.id.descr);
+                        textView1.setText(product.getDescription());
 
-                    imageRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(bytes -> {
-                        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                        imageView.setImageBitmap(bitmap);
-                    });
+                        String[] paths = product.getImage().split("/");
 
-                    Button button = getActivity().findViewById(R.id.textButton);
-                    button.setOnClickListener(ProductFragment.this::buyProduct);
+                        ImageView imageView = getActivity().findViewById(R.id.imageView);
+                        StorageReference imageRef = storageReference.child(paths[paths.length - 1]);
 
-                    try {
-                        JSONArray ingredients = new JSONArray(product.getIngredients());
-                        LinearLayout linearLayout = getActivity().findViewById(R.id.container);
+                        imageRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(bytes -> {
+                            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                            imageView.setImageBitmap(bitmap);
+                        });
 
-                        for (int i = 0; i < ingredients.length(); i++) {
-                            View view = layoutInflater.inflate(R.layout.ingredient, linearLayout, false);
-                            TextView textView = view.findViewById(R.id.textIngredient);
-                            textView.setText(ingredients.getString(i));
+                        try {
+                            JSONArray ingredients = new JSONArray(product.getIngredients());
+                            LinearLayout linearLayout = getActivity().findViewById(R.id.container);
 
-                            linearLayout.addView(view);
+                            for (int i = 0; i < ingredients.length(); i++) {
+                                View view = layoutInflater.inflate(R.layout.ingredient, linearLayout, false);
+                                TextView textView = view.findViewById(R.id.textIngredient);
+                                textView.setText(ingredients.getString(i));
+
+                                linearLayout.addView(view);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
                     }
                 }
-            }
-
-            @Override
-            public void onCancelled(@NonNull @NotNull DatabaseError error) {
-               navController.navigate(R.id.nav_home);
             }
         });
 
         MainActivity.userAuth.subscribe(v -> {
           atomicBoolean.set(v.isAuth());
           userAuth = v;
+
+          if(userAuth.isAdmin()){
+              btnActionLayout = requireActivity().findViewById(R.id.btnActionLayout);
+
+              View view = LayoutInflater.from(requireContext()).inflate(R.layout.delete_btn, btnActionLayout, false);
+
+              if(btnActionLayout.getChildCount() == 1){
+                  btnActionLayout.addView(view);
+
+                  view.setOnClickListener(new View.OnClickListener() {
+                      @Override
+                      public void onClick(View v) {
+                          dbReference.child(product.getId()).removeValue();
+                          Toast.makeText(requireContext(), "The product is deleted", Toast.LENGTH_LONG).show();
+                      }
+                  });
+              }
+          }
         });
+
+        BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Order order = new Order();
+
+                try {
+                     order.setCount(Integer.parseInt(intent.getExtras().getString("number", "0")));
+                } catch(NumberFormatException e){
+                     order.setCount(1);
+                     buyProduct(order);
+                }
+
+                Log.i(ProductFragment.class.getName(), "IntentFilter: " + GetOrdersNumberFragment.intentAction);
+            }
+        };
+
+        requireActivity().registerReceiver(broadcastReceiver, new IntentFilter(GetOrdersNumberFragment.intentAction));
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_product, container, false);
+        View view = inflater.inflate(R.layout.fragment_product, container, false);
+        Button button = view.findViewById(R.id.textButton);
+        button.setOnClickListener(ProductFragment.this::handleOrderClick);
+
+        return view;
+    }
+
+    public void handleOrderClick(View view){
+        GetOrdersNumberFragment getOrdersNumberFragment = new GetOrdersNumberFragment();
+        getOrdersNumberFragment.show(getChildFragmentManager(), "");
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public void buyProduct(View view){
-        if(atomicBoolean.get() && userAuth != null){
-            Order order = new Order();
-            order.setStatus(OrderStatus.UNVERIFIED.toString());
-            order.setEmail(userAuth.getUser().getEmail());
-            order.setCount(1);
+    public void buyProduct(Order order){
+        order.setStatus(OrderStatus.UNVERIFIED.toString());
+        order.setEmail(userAuth.getUser().getEmail());
+        order.setCount(1);
 
-            Calendar calendar = new GregorianCalendar();
-            Date date = calendar.getTime();
-            order.setTime(date.toString());
+        Calendar calendar = new GregorianCalendar();
+        Date date = calendar.getTime();
+        order.setTime(date.toString());
 
-            DatabaseReference orderReference = firebaseDatabase.getReference(MyService.ORDER_KEY);
+        DatabaseReference orderReference = firebaseDatabase.getReference(MyService.ORDER_KEY);
 
-            String key = orderReference.push().getKey();
-            order.setKey(key);
-            order.setDishKey(product.getId());
+        DatabaseReference orderRef = orderReference.push();
+        order.setKey(orderRef.getKey());
+        order.setDishKey(product.getId());
+        orderRef.setValue(order);
 
-            getView().post(() -> {
-                orderReference.push().setValue(order).addOnSuccessListener(v -> {
-                    Toast.makeText(getContext(), "The product is added to the cart", Toast.LENGTH_LONG).show();
-                }).addOnFailureListener(v -> {
-                    v.printStackTrace();
-                    Toast.makeText(getContext(), "Please, try later again", Toast.LENGTH_LONG).show();
-                });
-            });
-        } else {
-            navController.navigate(R.id.nav_login);
-        }
+        Log.i(ProductFragment.class.getName(),"The product key is " + product.getId());
+
+        Toast.makeText(getContext(), "The product is added to the cart", Toast.LENGTH_LONG).show();
     }
 }

@@ -17,4 +17,8 @@
     <style name="DangerButton" parent="Widget.MaterialComponents.Button.UnelevatedButton">
         <item name="backgroundTint">@color/red</item>
     </style>
+
+    <style name="OrangeButton" parent="Widget.MaterialComponents.Button.UnelevatedButton">
+        <item name="backgroundTint">@color/orange</item>
+    </style>
 </resources>

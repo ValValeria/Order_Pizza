@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
@@ -21,6 +22,9 @@ import android.widget.Toast;
 import com.example.shopapp.R;
 import com.example.shopapp.models.Product;
 import com.example.shopapp.services.MyService;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputEditText;
@@ -148,13 +152,14 @@ public class AddProductFragment extends Fragment {
             TextInputEditText weight = getView().findViewById(R.id.weightInput);
             product.setWeight(Integer.parseInt(weight.getText().toString()));
 
-            product.setId(db.push().getKey());
-
             JSONArray jsonArray = new JSONArray(ingredientsList);
             String ingredientsJson = jsonArray.toString();
             product.setIngredients(ingredientsJson);
 
-            db.push().setValue(product);
+            DatabaseReference refProduct = db.push();
+            product.setId(refProduct.getKey());
+
+            refProduct.setValue(product);
 
             Toast.makeText(getContext(), "The dish is added to database", Toast.LENGTH_LONG).show();
 

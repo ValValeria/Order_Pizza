@@ -143,6 +143,10 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.nav_orders:
                     navController.navigate(R.id.nav_order);
                     break;
+                case R.id.nav_logout:
+                    navController.navigate(R.id.nav_home);
+                    FirebaseAuth.getInstance().signOut();
+                    break;
             }
 
             drawerLayout.close();
@@ -161,10 +165,14 @@ public class MainActivity extends AppCompatActivity {
             if(!userAuthObj.isAdmin()){
                 menu.removeItem(R.id.nav_add_product);
             }
+
             if(userAuthObj != null && userAuthObj.isAuth()){
                 menu.removeItem(R.id.nav_login);
                 menu.removeItem(R.id.nav_signup);
+            } else {
+                menu.removeItem(R.id.nav_logout);
             }
+
             if(userAuthObj != null && userAuthObj.isAdmin()){
                 menu.removeItem(R.id.nav_orders);
             }

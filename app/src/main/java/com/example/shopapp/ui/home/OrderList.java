@@ -46,6 +46,7 @@ public class OrderList extends Fragment {
     private List<String> orderListId = new ArrayList<>();
     private MaterialCardView noResults;
     private LinearLayout results;
+    private Button submitButton;
 
     @Override
     public void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
@@ -84,7 +85,7 @@ public class OrderList extends Fragment {
             Navigation.findNavController(getActivity(), R.id.nav_host_fragment).navigate(R.id.nav_home);
         });
 
-        Button submitButton = getActivity().findViewById(R.id.submit_orders);
+        submitButton = getActivity().findViewById(R.id.submit_orders);
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -115,18 +116,16 @@ public class OrderList extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-
-        loadData();
     }
 
     public void addOrder(Order order){
        DatabaseReference databaseProductReference = FirebaseDatabase.getInstance().getReference(MyService.PRODUCT_KEY);
        Log.i(OrderList.class.getName(), "The id of product is " + order.getDishKey());
+       submitButton.setVisibility(View.VISIBLE);
 
-       databaseProductReference.child(order.getKey()).get()
+       databaseProductReference.child(order.getDishKey()).get()
                .addOnSuccessListener(dataSnapshot -> {
                    Product product = dataSnapshot.getValue(Product.class);
-                   product.setId(dataSnapshot.getKey());
 
                    LayoutInflater layoutInflater = LayoutInflater.from(getContext());
                    View view = layoutInflater.inflate(R.layout.order_item, results, false);

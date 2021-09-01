@@ -60,4 +60,8 @@
     <string name="order_new_dishes_in_our_app">Order new dishes in our app</string>
     <string name="visit_the_page">Visit the page</string>
     <string name="your_orders">Your orders</string>
+    <string name="image">Image</string>
+    <string name="specify_the_number_of_your_order">Specify the number of your order</string>
+    <string name="log_out">Log out</string>
+    <string name="delete">Delete</string>
 </resources>

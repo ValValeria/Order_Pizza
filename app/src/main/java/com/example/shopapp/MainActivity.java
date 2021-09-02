@@ -16,6 +16,7 @@ import com.example.shopapp.classes.UserAuth;
 import com.example.shopapp.models.Order;
 import com.example.shopapp.models.Product;
 import com.example.shopapp.services.MyService;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -41,6 +42,7 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -55,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private NavigationView navigationView;
     private DrawerLayout drawerLayout;
     public static BehaviorSubject<UserAuth> userAuth = BehaviorSubject.create();
-    public static PublishSubject<Product> search = PublishSubject.create();
+    public static PublishSubject<List<Product>> search = PublishSubject.create();
     private UserAuth userAuthObj;
     private FragmentContainerView fragmentContainerView;
     private AtomicBoolean isNotificationsSetUp = new AtomicBoolean(false);
@@ -106,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference(MyService.PRODUCT_KEY);
+                List<Product> list = new ArrayList<>();
 
                 databaseReference.get().addOnSuccessListener(dataSnapshot -> {
                     navController.navigate(R.id.nav_search);
@@ -115,11 +118,13 @@ public class MainActivity extends AppCompatActivity {
                         product.setId(dataSnapshot1.getKey());
 
                         if(product.getTitle().contains(query) || product.getDescription().contains(query)){
-                            search.onNext(product);
+                            list.add(product);
                         } else {
                             Toast.makeText(MainActivity.this, "Not found", Toast.LENGTH_LONG).show();
                         }
                     }
+
+                    search.onNext(list);
                 });
 
 
@@ -163,9 +168,12 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.nav_logout:
                     navController.navigate(R.id.nav_home);
                     FirebaseAuth.getInstance().signOut();
+                    userAuthObj = new UserAuth();
+                    userAuth.onNext(userAuthObj);
                     break;
                 case R.id.nav_admin:
                     navController.navigate(R.id.nav_admin);
+                    break;
             }
 
             drawerLayout.close();
@@ -190,9 +198,9 @@ public class MainActivity extends AppCompatActivity {
             }
 
             if(userAuthObj.isAuth()){
-                menu.findItem(R.id.nav_login).setVisible( false);
-                menu.findItem(R.id.nav_signup).setVisible( false);
-                menu.findItem(R.id.nav_logout).setVisible( true);
+                menu.findItem(R.id.nav_login).setVisible(false);
+                menu.findItem(R.id.nav_signup).setVisible(false);
+                menu.findItem(R.id.nav_logout).setVisible(true);
             } else {
                 menu.findItem(R.id.nav_login).setVisible(true);
                 menu.findItem(R.id.nav_signup).setVisible(true);
@@ -200,11 +208,9 @@ public class MainActivity extends AppCompatActivity {
             }
 
             if(!userAuthObj.isAdmin() && userAuthObj.isAuth()){
-                menu.findItem(R.id.nav_orders).setVisible(false);
-            } else if(userAuthObj.isAuth()){
                 menu.findItem(R.id.nav_orders).setVisible(true);
-            } else{
-                menu.findItem(R.id.nav_orders).setVisible(false);
+            } else {
+                menu.findItem(R.id.nav_orders).setVisible(userAuthObj.isAuth());
             }
 
             if(userAuthObj.isAdmin() && !isNotificationsSetUp.get()){
@@ -219,52 +225,41 @@ public class MainActivity extends AppCompatActivity {
         DatabaseReference dbOrderRef = FirebaseDatabase.getInstance().getReference(MyService.ORDER_KEY);
         DatabaseReference dbProductRef = FirebaseDatabase.getInstance().getReference(MyService.PRODUCT_KEY);
 
-        dbOrderRef.addChildEventListener(new ChildEventListener() {
+        dbOrderRef.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onChildAdded(@NonNull @NotNull DataSnapshot snapshot, @Nullable @org.jetbrains.annotations.Nullable String previousChildName) {
-                Order order = snapshot.getValue(Order.class);
-                DataSnapshot dataSnapshot = dbProductRef.child(order.getDishKey()).get().getResult();
+            public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
+                if(snapshot.exists()){
+                    Order order = snapshot.getValue(Order.class);
 
-                if(dataSnapshot.exists()){
-                    Product product = dataSnapshot.getValue(Product.class);
+                    dbProductRef.child(order.getDishKey())
+                            .get().addOnSuccessListener(dataSnapshot -> {
+                        if(dataSnapshot.exists()){
+                            Product product = dataSnapshot.getValue(Product.class);
 
-                    Intent notificationIntent = new Intent(MainActivity.this, MainActivity.class);
-                    notificationIntent.putExtra(MainActivity.NOTIFICATION_KEY, product.getId());
+                            Intent notificationIntent = new Intent(MainActivity.this, MainActivity.class);
+                            notificationIntent.putExtra(MainActivity.NOTIFICATION_KEY, product.getId());
 
-                    PendingIntent pendingIntent = PendingIntent.getActivity(MainActivity.this,
-                            0, notificationIntent,
-                            PendingIntent.FLAG_CANCEL_CURRENT);
+                            PendingIntent pendingIntent = PendingIntent.getActivity(MainActivity.this,
+                                    0, notificationIntent,
+                                    PendingIntent.FLAG_CANCEL_CURRENT);
 
-                    String longContent = String.format("The dish: %s .The total count of order is %d. Status: %s. Time " + order.getTime(),
-                            product.getTitle(), order.getCount(), order.getStatus().toLowerCase());
+                            String longContent = String.format("The dish: %s .The total count of order is %d. Status: %s. Time " + order.getTime(),
+                                    product.getTitle(), order.getCount(), order.getStatus().toLowerCase());
 
-                    NotificationCompat.Builder builder =
-                            new NotificationCompat.Builder(MainActivity.this, CHANNEL_ID)
-                                    .setContentTitle("New order")
-                                    .setContentText("The number of order is " + order.getCount())
-                                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                                    .setStyle(new NotificationCompat.BigTextStyle().bigText(longContent))
-                                    .addAction(R.drawable.ic_baseline_open_in_new_24, "Visit", pendingIntent);
+                            NotificationCompat.Builder builder =
+                                    new NotificationCompat.Builder(MainActivity.this, CHANNEL_ID)
+                                            .setContentTitle("New order")
+                                            .setContentText("The number of order is " + order.getCount())
+                                            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                                            .setStyle(new NotificationCompat.BigTextStyle().bigText(longContent))
+                                            .addAction(R.drawable.ic_baseline_open_in_new_24, "Visit", pendingIntent);
 
-                    NotificationManagerCompat notificationManager =
-                            NotificationManagerCompat.from(MainActivity.this);
-                    notificationManager.notify(NOTIFY_ID, builder.build());
+                            NotificationManagerCompat notificationManager =
+                                    NotificationManagerCompat.from(MainActivity.this);
+                            notificationManager.notify(NOTIFY_ID, builder.build());
+                        }
+                    });
                 }
-            }
-
-            @Override
-            public void onChildChanged(@NonNull @NotNull DataSnapshot snapshot, @Nullable @org.jetbrains.annotations.Nullable String previousChildName) {
-
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull @NotNull DataSnapshot snapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull @NotNull DataSnapshot snapshot, @Nullable @org.jetbrains.annotations.Nullable String previousChildName) {
-
             }
 
             @Override

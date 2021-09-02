@@ -57,7 +57,6 @@ public class HomeFragment extends Fragment{
     @Override
     public View onCreateView(@NotNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         layoutInflater = LayoutInflater.from(getContext());
-
         firebaseStorage = FirebaseStorage.getInstance();
         storageReference = firebaseStorage.getReference();
 
@@ -77,7 +76,7 @@ public class HomeFragment extends Fragment{
     public void onStart() {
         super.onStart();
 
-        getView().post(this::loadData);
+        this.requireView().post(this::loadData);
     }
 
     @Override
@@ -85,7 +84,7 @@ public class HomeFragment extends Fragment{
         super.onResume();
 
         if(isPaused.get()){
-            getView().post(this::loadData);
+            this.requireView().post(this::loadData);
         }
     }
 

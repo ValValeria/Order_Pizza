@@ -76,4 +76,9 @@
     <string name="admin_panel">Admin panel</string>
     <string name="unready_orders">Unready orders</string>
     <string name="ready_orders">Ready orders</string>
+    <string name="the_list_of_orders">The list of orders</string>
+    <string name="contact_with_email">Contact with email</string>
+    <string name="call_us">Call us</string>
+    <string name="email_to_us">Email to us</string>
+    <string name="results">Results</string>
 </resources>

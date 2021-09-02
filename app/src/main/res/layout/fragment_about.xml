@@ -38,23 +38,21 @@
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/contact_us"
+            android:text="@string/call_us"
             android:id="@+id/contact_btn"
             android:paddingBottom="@dimen/space_half"
+            android:layout_marginTop="@dimen/space_half"
             style="@style/Widget.AppCompat.Button"
             />
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/contact_us"
+            android:text="@string/email_to_us"
             android:id="@+id/contact_btn_email"
-            style="@style/Widget.AppCompat.Button"
+            android:paddingBottom="@dimen/space_half"
+            android:layout_marginTop="@dimen/space_half"
+            style="@style/OrangeButton"
             />
     </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/shape" />
 </LinearLayout>

@@ -71,6 +71,8 @@ public class ProductFragment extends Fragment {
     private UserAuth userAuth;
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     private LinearLayout btnActionLayout;
+    private Order order = new Order();
+    private Button button;
 
     @Override
     public void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
@@ -132,37 +134,12 @@ public class ProductFragment extends Fragment {
             }
         });
 
-        MainActivity.userAuth.subscribe(v -> {
-          atomicBoolean.set(v.isAuth());
-          userAuth = v;
-
-          if(userAuth.isAdmin()){
-              btnActionLayout = requireActivity().findViewById(R.id.btnActionLayout);
-
-              View view = LayoutInflater.from(requireContext()).inflate(R.layout.delete_btn, btnActionLayout, false);
-
-              if(btnActionLayout.getChildCount() == 1){
-                  btnActionLayout.addView(view);
-
-                  view.setOnClickListener(new View.OnClickListener() {
-                      @Override
-                      public void onClick(View v) {
-                          dbReference.child(product.getId()).removeValue();
-                          Toast.makeText(requireContext(), "The product is deleted", Toast.LENGTH_LONG).show();
-                      }
-                  });
-              }
-          }
-        });
-
         BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onReceive(Context context, Intent intent) {
-                Order order = new Order();
-
                 try {
-                     Integer number = Integer.parseInt(intent.getExtras().getString("number", "0"));
+                     int number = Integer.parseInt(intent.getExtras().getString("number", "1"));
                      order.setCount(number);
                 } catch(NumberFormatException e){
                      e.printStackTrace();
@@ -171,7 +148,8 @@ public class ProductFragment extends Fragment {
 
                 buyProduct(order);
 
-                Log.i(ProductFragment.class.getName(), "IntentFilter: " + GetOrdersNumberFragment.intentAction);
+                Log.i(ProductFragment.class.getName(), "IntentFilter: " + GetOrdersNumberFragment.intentAction +
+                        ". Number: " + order.getCount());
             }
         };
 
@@ -182,10 +160,37 @@ public class ProductFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_product, container, false);
-        Button button = view.findViewById(R.id.textButton);
+        button = view.findViewById(R.id.textButton);
         button.setOnClickListener(ProductFragment.this::handleOrderClick);
 
         return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        MainActivity.userAuth.subscribe(v -> {
+            atomicBoolean.set(v.isAuth());
+            userAuth = v;
+
+            if(userAuth.isAdmin()){
+                button.setEnabled(false);
+
+                btnActionLayout = ProductFragment.this.requireActivity().findViewById(R.id.btnActionLayout);
+
+                View view1 = LayoutInflater.from(requireContext()).inflate(R.layout.delete_btn, btnActionLayout, false);
+
+                if(btnActionLayout.getChildCount() == 1){
+                    btnActionLayout.addView(view1);
+
+                    view1.setOnClickListener(v1 -> {
+                        dbReference.child(product.getId()).removeValue();
+                        Toast.makeText(requireContext(), "The product is deleted", Toast.LENGTH_LONG).show();
+                    });
+                }
+            }
+        });
     }
 
     public void handleOrderClick(View view){
@@ -213,6 +218,8 @@ public class ProductFragment extends Fragment {
         order.setKey(orderRef.getKey());
         order.setDishKey(product.getId());
         orderRef.setValue(order);
+
+        orderReference.child(order.getKey()).setValue(order);
 
         Log.i(ProductFragment.class.getName(),"The product key is " + product.getId());
 

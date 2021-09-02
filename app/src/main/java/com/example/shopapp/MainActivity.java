@@ -20,6 +20,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -27,6 +28,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.Fragment;
@@ -217,9 +219,9 @@ public class MainActivity extends AppCompatActivity {
         DatabaseReference dbOrderRef = FirebaseDatabase.getInstance().getReference(MyService.ORDER_KEY);
         DatabaseReference dbProductRef = FirebaseDatabase.getInstance().getReference(MyService.PRODUCT_KEY);
 
-        dbOrderRef.addValueEventListener(new ValueEventListener() {
+        dbOrderRef.addChildEventListener(new ChildEventListener() {
             @Override
-            public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
+            public void onChildAdded(@NonNull @NotNull DataSnapshot snapshot, @Nullable @org.jetbrains.annotations.Nullable String previousChildName) {
                 Order order = snapshot.getValue(Order.class);
                 DataSnapshot dataSnapshot = dbProductRef.child(order.getDishKey()).get().getResult();
 
@@ -233,17 +235,36 @@ public class MainActivity extends AppCompatActivity {
                             0, notificationIntent,
                             PendingIntent.FLAG_CANCEL_CURRENT);
 
+                    String longContent = String.format("The dish: %s .The total count of order is %d. Status: %s. Time " + order.getTime(),
+                            product.getTitle(), order.getCount(), order.getStatus().toLowerCase());
+
                     NotificationCompat.Builder builder =
                             new NotificationCompat.Builder(MainActivity.this, CHANNEL_ID)
                                     .setContentTitle("New order")
                                     .setContentText("The number of order is " + order.getCount())
                                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                                    .setStyle(new NotificationCompat.BigTextStyle().bigText(longContent))
                                     .addAction(R.drawable.ic_baseline_open_in_new_24, "Visit", pendingIntent);
 
                     NotificationManagerCompat notificationManager =
                             NotificationManagerCompat.from(MainActivity.this);
                     notificationManager.notify(NOTIFY_ID, builder.build());
                 }
+            }
+
+            @Override
+            public void onChildChanged(@NonNull @NotNull DataSnapshot snapshot, @Nullable @org.jetbrains.annotations.Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull @NotNull DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull @NotNull DataSnapshot snapshot, @Nullable @org.jetbrains.annotations.Nullable String previousChildName) {
+
             }
 
             @Override

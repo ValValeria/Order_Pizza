@@ -79,13 +79,7 @@ public class ProductFragment extends Fragment {
         firebaseStorage = FirebaseStorage.getInstance();
         storageReference = firebaseStorage.getReference();
 
-        Intent intent = requireActivity().getIntent(); /// ???
-
-        if(intent != null && intent.getStringExtra(MainActivity.NOTIFICATION_KEY) != null){
-           key = intent.getStringExtra(MainActivity.NOTIFICATION_KEY);
-        }else{
-           key = requireArguments().getString("key");
-        }
+        key = requireArguments().getString("key");
 
         navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
 

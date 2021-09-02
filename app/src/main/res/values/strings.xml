@@ -74,4 +74,6 @@
     <string name="but_there_no_orders">But there no orders</string>
     <string name="change_the_status_of_order">Change the status of order</string>
     <string name="admin_panel">Admin panel</string>
+    <string name="unready_orders">Unready orders</string>
+    <string name="ready_orders">Ready orders</string>
 </resources>

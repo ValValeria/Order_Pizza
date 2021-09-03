@@ -30,7 +30,11 @@ public class ViewPagerAdapter extends FragmentStateAdapter {
         AdminContentFragment adminContentFragment = new AdminContentFragment();
         adminContentFragment.setArguments(bundle);
 
-        bundle.putBoolean(OrderStatus.UNREADY.toString(), position == OrderStatus.UNREADY.ordinal());
+        if(position == 0){
+           bundle.putBoolean(OrderStatus.UNREADY.toString(), true);
+        } else {
+           bundle.putBoolean(OrderStatus.UNREADY.toString(), false);
+        }
 
         return adminContentFragment;
     }
@@ -39,5 +43,4 @@ public class ViewPagerAdapter extends FragmentStateAdapter {
     public int getItemCount() {
         return 2;
     }
-
 }

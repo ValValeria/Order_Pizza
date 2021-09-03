@@ -6,18 +6,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.icu.text.RelativeDateTimeFormatter;
 import android.os.Build;
 import android.os.Bundle;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
-import androidx.navigation.fragment.NavHostFragment;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,7 +23,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.example.shopapp.MainActivity;
 import com.example.shopapp.R;
 import com.example.shopapp.classes.UserAuth;
@@ -36,22 +31,15 @@ import com.example.shopapp.models.Order;
 import com.example.shopapp.models.Product;
 import com.example.shopapp.services.MyService;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
-
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -139,17 +127,17 @@ public class ProductFragment extends Fragment {
             @Override
             public void onReceive(Context context, Intent intent) {
                 try {
-                     int number = Integer.parseInt(intent.getExtras().getString("number", "1"));
+                     String strNum = intent.getExtras().getString("number", GetOrdersNumberFragment.number);
+                     int number = Integer.parseInt(strNum);
                      order.setCount(number);
+
+                     Log.i(ProductFragment.class.getName(), "IntentFilter: " + GetOrdersNumberFragment.intentAction +
+                            ". Number: " + number);
                 } catch(NumberFormatException e){
                      e.printStackTrace();
-                     order.setCount(1);
                 }
 
                 buyProduct(order);
-
-                Log.i(ProductFragment.class.getName(), "IntentFilter: " + GetOrdersNumberFragment.intentAction +
-                        ". Number: " + order.getCount());
             }
         };
 
@@ -160,7 +148,7 @@ public class ProductFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_product, container, false);
-        button = view.findViewById(R.id.textButton);
+        button = view.findViewById(R.id.order_a_product);
         button.setOnClickListener(ProductFragment.this::handleOrderClick);
 
         return view;
@@ -206,7 +194,6 @@ public class ProductFragment extends Fragment {
     public void buyProduct(Order order){
         order.setStatus(OrderStatus.UNVERIFIED.toString());
         order.setEmail(userAuth.getUser().getEmail());
-        order.setCount(1);
 
         Calendar calendar = new GregorianCalendar();
         Date date = calendar.getTime();

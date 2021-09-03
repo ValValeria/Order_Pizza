@@ -22,10 +22,9 @@
             />
 
         <LinearLayout
-            android:paddingTop="@dimen/space_half"
+            android:layout_marginTop="@dimen/space_half"
             android:id="@+id/results_container_search"
             android:orientation="vertical"
-            android:minHeight="160dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
         </LinearLayout>

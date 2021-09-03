@@ -70,13 +70,13 @@ public class HomeFragment extends Fragment{
         progressBar = view.findViewById(R.id.progressBar);
         linearLayout = view.findViewById(R.id.container);
         homeContent = view.findViewById(R.id.home_content);
+
+        requireView().post(this::loadData);
     }
 
     @Override
     public void onStart() {
         super.onStart();
-
-        this.requireView().post(this::loadData);
     }
 
     @Override
@@ -96,8 +96,9 @@ public class HomeFragment extends Fragment{
     }
 
     private void loadData(){
+        Log.i(HomeFragment.class.getName(), "Loading the data in home fragment");
+
         linearLayout.removeAllViews();
-        linearLayout.invalidate();
         linkedList.clear();
 
         AtomicInteger atomicInteger = new AtomicInteger(0);
@@ -105,30 +106,30 @@ public class HomeFragment extends Fragment{
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference databaseReference = database.getReference(MyService.PRODUCT_KEY);
 
-        databaseReference.get().addOnSuccessListener(dataSnapshot -> {
-            noResultView = LayoutInflater.from(requireContext()).inflate(R.layout.empty_results, linearLayout, false);
+        databaseReference.get()
+                .addOnSuccessListener(dataSnapshot -> {
+                    noResultView = LayoutInflater.from(requireContext()).inflate(R.layout.empty_results, linearLayout, false);
 
-            if(!dataSnapshot.hasChildren()){
-                addNoResultView();
-            } else{
-                homeContent.removeView(noResultView);
-            }
+                    if(!dataSnapshot.hasChildren()){
+                        addNoResultView();
+                    } else{
+                        homeContent.removeView(noResultView);
+                    }
 
-            homeContent.removeView(progressBar);
+                    homeContent.removeView(progressBar);
 
-            for ( DataSnapshot datasnapshot: dataSnapshot.getChildren()) {
-                Product product = datasnapshot.getValue(Product.class);
+                    for ( DataSnapshot datasnapshot: dataSnapshot.getChildren()) {
+                        Product product = datasnapshot.getValue(Product.class);
 
-                Log.e(HomeFragment.class.getName(), "The id of product fragment " + product.getId());
+                        Log.e(HomeFragment.class.getName(), "The id of product fragment " + product.getId());
 
-                if(atomicInteger.get() < PER_PAGE && !linkedList.contains(product.getId())){
-                    addCardsToView(product);
-                    linkedList.add(product.getId());
-                }
-            }
-
-            homeContent.invalidate();
-        });
+                        if(atomicInteger.get() < PER_PAGE && !linkedList.contains(product.getId())){
+                            addCardsToView(product);
+                            linkedList.add(product.getId());
+                        }
+                    }
+                })
+               .addOnFailureListener(Throwable::printStackTrace);
     }
 
     private void addCardsToView(Product product){
@@ -161,12 +162,13 @@ public class HomeFragment extends Fragment{
 
         button.setOnClickListener((view1) -> {
             Bundle bundle = new Bundle();
-            bundle.putString("key", product.getId().toString());
+            bundle.putString("key", product.getId());
 
             Navigation.findNavController(requireActivity(), R.id.nav_host_fragment).navigate(R.id.nav_product, bundle);
         });
 
         linearLayout.addView(view);
+        linearLayout.invalidate();
     }
 
     private void addNoResultView(){

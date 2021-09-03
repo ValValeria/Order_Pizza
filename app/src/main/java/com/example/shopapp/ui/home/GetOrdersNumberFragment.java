@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -22,6 +23,8 @@ import io.reactivex.rxjava3.subjects.PublishSubject;
 public class GetOrdersNumberFragment extends DialogFragment {
     public static PublishSubject<Boolean> publishSubject = PublishSubject.create();
     public static String intentAction = "com.example.shopapp.GET_NUMBER_OF_ORDER";
+    public static String number = "0";
+    private String TAG = GetOrdersNumberFragment.class.getName();
 
     @NonNull
     @NotNull
@@ -38,11 +41,14 @@ public class GetOrdersNumberFragment extends DialogFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                        String string = textInputEditText.getText().toString();
+                       number = string;
 
                        Intent intent = new Intent(intentAction);
                        intent.putExtra("number", string);
 
                        requireActivity().sendBroadcast(intent);
+
+                       Log.i(TAG, "The number of order is " + number);
                     }
                 })
                 .setNegativeButton("Close", new DialogInterface.OnClickListener() {

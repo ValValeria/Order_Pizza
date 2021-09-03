@@ -87,6 +87,8 @@ public class AdminFragment extends Fragment {
           } else {
               tab.setText(getResources().getString(R.string.ready_orders));
           }
+
+          viewPager.setCurrentItem(position, true);
         }).attach();
     }
 }
